@@ -1,5 +1,4 @@
 from gurobipy import *
-import random
 
 def lazy_connection(model):
     vertices = model._vertices
