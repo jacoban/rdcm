@@ -20,18 +20,18 @@ if __name__ == "__main__":
 
     file_m1 = open(gflags.FLAGS.m_1, 'r')
     line = file_m1.readlines()[0]
-    m_1 = map(lambda x: int(x) - 1, line.split())
+    m_1 = list(map(lambda x: int(x) - 1, line.split()))
 
     file_fixed = open(gflags.FLAGS.V_beta, 'r')
     line = file_fixed.readlines()[0]
-    fixed_agents = map(lambda x: int(x) - 1, line.split())
-    moving_robots = filter(lambda x: x not in fixed_agents, range(len(m_1)))
+    fixed_agents = list(map(lambda x: int(x) - 1, line.split()))
+    moving_robots = list(filter(lambda x: x not in fixed_agents, range(len(m_1))))
 
-    target_agents = map(lambda x: m_1[x], fixed_agents)
+    target_agents = list(map(lambda x: m_1[x], fixed_agents))
 
     file_start_agents = open(gflags.FLAGS.start_agents, 'r')
     line = file_start_agents.readlines()[0]
-    start_agents = map(lambda x: int(x) - 1, line.split())
+    start_agents = list(map(lambda x: int(x) - 1, line.split()))
 
     obj, alloc = load_heuristic_sol(gflags.FLAGS.log_file)
 

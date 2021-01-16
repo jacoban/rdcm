@@ -18,18 +18,18 @@ if __name__ == "__main__":
 
     heuristic_obj, heuristic_alloc = load_heuristic_sol(gflags.FLAGS.heu_sol_file)
 
-    print "Heu allocation:", heuristic_alloc
-    print "Moving robots:", moving_robots
-    print "Heu obj:", heuristic_obj
-    print "Sum:", sum(map(lambda x: distances[starting_pos[x], heuristic_alloc[x]], moving_robots))
+    print("Heu allocation:" + str(heuristic_alloc))
+    print("Moving robots:" + str(moving_robots))
+    print("Heu obj:" + str(heuristic_obj))
+    print("Sum:" + str(sum(map(lambda x: distances[starting_pos[x], heuristic_alloc[x]], moving_robots))))
 
     if is_solution_connected(graph, map(lambda x: x+1, heuristic_alloc)):
-        print "Solution is connected"
+        print("Solution is connected")
     else:
-        print "Solution is not connected"
+        print("Solution is not connected")
 
     if not(heuristic_obj < 1e+100):
-        print 'Algorithm cannot run since no feasible solution was provided. Exiting.'
+        print('Algorithm cannot run since no feasible solution was provided. Exiting.')
         exit(1)
 
     assert(abs(heuristic_obj -
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     start = time.time()
 
     moving_robots_new_locs = []
-    for i in xrange(len(heuristic_alloc)):
+    for i in range(len(heuristic_alloc)):
         if i in fixed_agents:
             pass
         else:
@@ -51,11 +51,10 @@ if __name__ == "__main__":
     assert(total_cost <= heuristic_obj)
 
     if total_cost < heuristic_obj:
-        print 'Total cost has changed from', heuristic_obj, 'to', total_cost
+        print('Total cost has changed from'  + str(heuristic_obj) + ' to ' + str(total_cost))
 
     else:
-        print 'Total cost has remained unchanged at', total_cost
+        print('Total cost has remained unchanged at' + str(total_cost))
 
-    print "Allocation is: ", new_allocation
-    #write_log(gflags.FLAGS.log_file, time.time() - start, total_cost, new_allocation, False)
+    print("Allocation is: " + str(new_allocation))
     write_log_with_dash(gflags.FLAGS.log_file, time.time() - start, total_cost, new_allocation, False)

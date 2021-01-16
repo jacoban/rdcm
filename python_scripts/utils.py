@@ -6,7 +6,7 @@ import random
 
 
 def is_solution_connected(graph, allocation):
-    subgraph = graph.subgraph(map(lambda x: x - 1, allocation))
+    subgraph = graph.subgraph(list(map(lambda x: x - 1, allocation)))
     return subgraph.is_connected()
 
 
@@ -19,6 +19,7 @@ def write_log(log_file, runtime, obj, allocation, fractional, gap=None):
     if gap is not None:
         log_file.write('Gap=' + str(gap) + '\n')
     log_file.close()
+
 
 def write_log_with_dash(log_file, runtime, obj, allocation, fractional, gap=None):
     log_file = open(log_file, 'w')
@@ -48,9 +49,9 @@ def load_data(data_path):
     graph_matrix = np.matrix(s)
     graph = Graph(directed=False)
     edges = []
-    for i in xrange(graph_matrix.shape[0]):
+    for i in range(graph_matrix.shape[0]):
         graph.add_vertex()
-        for j in xrange(i+1, graph_matrix.shape[0]):
+        for j in range(i+1, graph_matrix.shape[0]):
             if graph_matrix[i, j] == 1:
                 edges.append((i, j))
 
@@ -74,15 +75,15 @@ def load_data(data_path):
 
     file_starting = open(data_path + 'm_1.txt', 'r')
     line = file_starting.readlines()[0]
-    starting_pos = map(lambda x: int(x) - 1, line.split())
+    starting_pos = list(map(lambda x: int(x) - 1, line.split()))
 
     file_fixed = open(data_path + 'V_beta.txt', 'r')
     line = file_fixed.readlines()[0]
-    fixed_agents = map(lambda x: int(x) - 1, line.split())
+    fixed_agents = list(map(lambda x: int(x) - 1, line.split()))
 
-    starting_pos_fixed = map(lambda x: starting_pos[x], fixed_agents)
-    vertices_not_fixed = filter(lambda x: x not in starting_pos_fixed, range(len(graph.vs)))
-    moving_robots = filter(lambda x: x not in fixed_agents, range(len(starting_pos)))
+    starting_pos_fixed = list(map(lambda x: starting_pos[x], fixed_agents))
+    vertices_not_fixed = list(filter(lambda x: x not in starting_pos_fixed, range(len(graph.vs))))
+    moving_robots = list(filter(lambda x: x not in fixed_agents, range(len(starting_pos))))
 
     return graph, edges, distances, starting_pos, fixed_agents,\
            starting_pos_fixed, vertices_not_fixed, moving_robots
@@ -105,7 +106,7 @@ def load_heuristic_sol(file_path):
         elif 'Allocation' in line:
             s = line.split('=')
             allocation = eval(s[1])
-            allocation = map(lambda x: x - 1, allocation)
+            allocation = list(map(lambda x: x - 1, allocation))
 
     return heuristic_obj, allocation
 
@@ -113,9 +114,9 @@ def load_heuristic_sol(file_path):
 def optimal_alloc_util(moving_robots, moving_robots_new_locs, distances, starting_pos, fixed_agents):
     cost_matrix = []
 
-    for r_index in xrange(len(moving_robots)):
+    for r_index in range(len(moving_robots)):
         cost_matrix.append([])
-        for l_index in xrange(len(moving_robots_new_locs)):
+        for l_index in range(len(moving_robots_new_locs)):
             cost_matrix[-1].append(distances[starting_pos[moving_robots[r_index]], moving_robots_new_locs[l_index]])
 
     m = Munkres()

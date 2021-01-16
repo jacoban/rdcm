@@ -8,7 +8,7 @@ from copy import deepcopy
 import cv2
 import numpy as np
 
-gflags.DEFINE_string('mode', 'real', 'instances to be generated (random/real)')
+gflags.DEFINE_string('mode', 'random', 'instances to be generated (random/real)')
 gflags.DEFINE_string('map_filepath', '../envs/stump_map.png', 'filepath to the image representing the map')
 gflags.DEFINE_integer('size', 20, 'Random: side length of the grid. Real: grid discr. (pixels).')
 gflags.DEFINE_integer('comm_range', 3, 'Comm. range. Random: manhattan distance. Map: pixels.')
@@ -100,7 +100,7 @@ def get_G_wp_from_graph_real(G_E, G_C):
 
 
 def create_real_graph(map_filepath, size, comm_range, debug):
-    print 'Creating grid physical graph...'
+    print('Creating grid physical graph...')
     im = cv2.imread(map_filepath)
     im_array = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 
@@ -109,7 +109,7 @@ def create_real_graph(map_filepath, size, comm_range, debug):
 
     G_E = Graph(directed=False)
     curr_id = 0
-    bu = gflags.FLAGS.size / 2
+    bu = int(gflags.FLAGS.size / 2)
     for i in range(0, rows, gflags.FLAGS.size):
         for j in range(0, cols, gflags.FLAGS.size):
             if is_grid_cell(im_array, i, j, rows, cols):
@@ -133,7 +133,7 @@ def create_real_graph(map_filepath, size, comm_range, debug):
             neighbors.append((vertex_id, right[0].index))
 
     G_E.add_edges(neighbors)
-    print 'Done. Number of vertices: ', len(G_E.vs)
+    print('Done. Number of vertices: ' + str(len(G_E.vs)))
 
     if gflags.FLAGS.debug:
         """plt.imshow(im_array)
@@ -143,7 +143,7 @@ def create_real_graph(map_filepath, size, comm_range, debug):
             plt.plot([v1['x_coord'], v2['x_coord']], [v1['y_coord'], v2['y_coord']], 'b')
         pass"""
 
-    print 'Creating los communication graph...'
+    print('Creating los communication graph...')
 
     G_C = Graph(directed=False)
 
@@ -167,7 +167,7 @@ def create_real_graph(map_filepath, size, comm_range, debug):
 
     G_C.add_edges(neighbors)
 
-    print 'Done. Number of communication edges: ', len(neighbors)
+    print('Done. Number of communication edges: ' + str(len(neighbors)))
 
     # this is for debug plot in the main function
     for vertex_id in range(len(G_C.vs)):
@@ -190,7 +190,7 @@ def create_real_graph(map_filepath, size, comm_range, debug):
 
     G, wp, sps = get_G_wp_from_graph_real(G_E, G_C)
 
-    print "Function call completed."
+    print("Function call completed.")
 
     return G_C, G, wp, sps, im_array
 
@@ -199,8 +199,8 @@ def create_random_graph(size, comm_range, debug):
     graph = Graph(directed=False)
     curr_id = 0
 
-    for i in xrange(size):
-        for j in xrange(size):
+    for i in range(size):
+        for j in range(size):
             graph.add_vertex()
             graph.vs[curr_id]['i'] = i
             graph.vs[curr_id]['j'] = j
@@ -260,8 +260,8 @@ def get_G_wp_from_graph_random(graph, size):
 def write_matrix_to_file(matrix, size, path):
     s = ""
 
-    for i in xrange(size):
-        for j in xrange(size):
+    for i in range(size):
+        for j in range(size):
             s += str(matrix[i][j]) + '\t'
 
         s += '\n'
@@ -294,11 +294,11 @@ def get_deployment_close(graph, start_agents, moving_robots, start_v_rob, sps=No
             j_a = graph.vs[v_a]['j']
 
             if sps is None:
-                candidates = filter(lambda x: abs(graph.vs[x]['i'] - i_a) <= gflags.FLAGS.stump_dist and abs(graph.vs[x]['j'] - j_a) <=
-                                              gflags.FLAGS.stump_dist and x not in start_v_rob, range(len(graph.vs)))
+                candidates = list(filter(lambda x: abs(graph.vs[x]['i'] - i_a) <= gflags.FLAGS.stump_dist and abs(graph.vs[x]['j'] - j_a) <=
+                                              gflags.FLAGS.stump_dist and x not in start_v_rob, range(len(graph.vs))))
 
             else:
-                candidates = filter(lambda x: sps[v_a][x] <= gflags.FLAGS.stump_dist and x not in start_v_rob, range(len(graph.vs)))
+                candidates = list(filter(lambda x: sps[v_a][x] <= gflags.FLAGS.stump_dist and x not in start_v_rob, range(len(graph.vs))))
 
             new_v = random.choice(candidates)
             pos_agents[a] = new_v
@@ -322,12 +322,12 @@ def get_deployment(graph, fixed_agents, moving_robots, mode='random', start_v_ro
     if mode == 'random':
 
         while True:
-            vertices_agents = random.sample(filter(lambda x: x not in start_v_rob, range(len(graph.vs))), len(fixed_agents))
+            vertices_agents = random.sample(list(filter(lambda x: x not in start_v_rob, range(len(graph.vs)))), len(fixed_agents))
 
             if graph.subgraph(vertices_agents).is_connected():
                 continue
 
-            vertices_robots = random.sample(filter(lambda x: x not in vertices_agents, range(len(graph.vs))),
+            vertices_robots = random.sample(list(filter(lambda x: x not in vertices_agents, range(len(graph.vs)))),
                                         len(moving_robots))
 
             all_vertices = vertices_agents + vertices_robots
@@ -340,27 +340,27 @@ def get_deployment(graph, fixed_agents, moving_robots, mode='random', start_v_ro
         vertices_robots = deepcopy(moving_robots)
 
     else:
-        print "Mode not recognized!"
+        print("Mode not recognized!")
         exit(1)
 
-    for i in xrange(len(fixed_agents)):
+    for i in range(len(fixed_agents)):
         pos_agents[fixed_agents[i]] = vertices_agents[i]
         pos_entities[fixed_agents[i]] = vertices_agents[i]
 
-    for i in xrange(len(moving_robots)):
+    for i in range(len(moving_robots)):
         pos_robots[moving_robots[i]] = vertices_robots[i]
         pos_entities[moving_robots[i]] = vertices_robots[i]
 
     graphD = Graph(directed=False)
     matrixD = [[0 for _ in entities] for _ in entities]
 
-    for i in xrange(len(entities)):
+    for i in range(len(entities)):
         graphD.add_vertex()
 
     edgesD = []
 
-    for i in xrange(len(entities)):
-        for j in xrange(i + 1, len(entities)):
+    for i in range(len(entities)):
+        for j in range(i + 1, len(entities)):
             if graph.are_connected(pos_entities[i], pos_entities[j]):
                 edgesD.append((i, j))
 
@@ -378,7 +378,7 @@ def get_deployment(graph, fixed_agents, moving_robots, mode='random', start_v_ro
     return matrixD, pos_agents, pos_robots, vertices_agents, vertices_robots
 
 
-if __name__ == "__main__":
+def run_main():
     random.seed(1)
 
     argv = gflags.FLAGS(sys.argv)
@@ -407,7 +407,7 @@ if __name__ == "__main__":
             map_name = map_name[:-4]
 
         else:
-            print "Only png files are supported. Exiting."
+            print("Only png files are supported. Exiting.")
             exit(1)
 
         if not os.path.exists('../data/random_grids'):
@@ -419,23 +419,23 @@ if __name__ == "__main__":
         graph, G, wp, sps, im_array = create_real_graph(gflags.FLAGS.map_filepath, gflags.FLAGS.size, gflags.FLAGS.comm_range,
                                                    gflags.FLAGS.debug)
 
-        print "Ready for generating experiments."
+        print("Ready for generating experiments.")
 
     else:
-        print "Mode not recognized. Exiting."
+        print("Mode not recognized. Exiting.")
         exit(1)
 
     graph.write(base_path + '.graphml', format='graphml')
 
-    fixed_agents = range(0, gflags.FLAGS.agents)
-    moving_robots = range(gflags.FLAGS.agents, gflags.FLAGS.agents + gflags.FLAGS.robots)
+    fixed_agents = list(range(0, gflags.FLAGS.agents))
+    moving_robots = list(range(gflags.FLAGS.agents, gflags.FLAGS.agents + gflags.FLAGS.robots))
 
-    for n in xrange(gflags.FLAGS.experiments):
-        print "Experiment ", n
+    for n in range(gflags.FLAGS.experiments):
+        print("Experiment " + str(n))
         write_matrix_to_file(G, len(graph.vs), base_path + '_' + str(n) + '_G.txt')
         write_matrix_to_file(wp, len(graph.vs), base_path + '_' + str(n) + '_w_p.txt')
 
-        write_list_to_file(map(lambda x: x + 1, fixed_agents), base_path + '_' + str(n) + '_V_beta.txt')
+        write_list_to_file(list(map(lambda x: x + 1, fixed_agents)), base_path + '_' + str(n) + '_V_beta.txt')
 
         if not gflags.FLAGS.stump_close:
             D, start_agents, start_robots, start_v_ag, start_v_rob = get_deployment(graph, fixed_agents, moving_robots,
@@ -523,3 +523,7 @@ if __name__ == "__main__":
             plt.show()
 
             pass
+
+
+if __name__ == "__main__":
+    run_main()

@@ -21,7 +21,7 @@ def callback(model, where):
 def add_variables(m, Y, Z, graph, vertices_not_fixed, moving_robots, distances, starting_pos, heuristic_obj=float('inf')):
     n_vertices = len(graph.vs)
 
-    for v in xrange(n_vertices):
+    for v in range(n_vertices):
         Y[v] = m.addVar(vtype=GRB.BINARY, name="y[%d]" % v)
 
     for v in vertices_not_fixed:
@@ -62,11 +62,11 @@ def add_constraints(m, Y, Z, graph, moving_robots, vertices_not_fixed, starting_
         m.addConstr(Y[v] == 1)
 
     # helpful inequalities
-    for v in xrange(len(graph.vs)):
+    for v in range(len(graph.vs)):
         m.addConstr(quicksum(Y[u] for u in graph.neighbors(v)) >= Y[v])
 
 
-if __name__ == "__main__":
+def run_main():
     argv = gflags.FLAGS(sys.argv)
 
     graph, edges, distances, starting_pos, fixed_agents,\
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     # avoids to always rebuild the vertices set
     working_graph = Graph(directed=False)
-    for i in xrange(len(graph.vs)):
+    for i in range(len(graph.vs)):
         working_graph.add_vertex()
     m._working_graph = working_graph
 
@@ -114,23 +114,23 @@ if __name__ == "__main__":
     m.optimize(callback)
 
     runtime = m.getAttr('Runtime')
-    print "Runtime is: ", runtime
+    print("Runtime is: ", runtime)
 
     if m.status == GRB.status.INF_OR_UNBD:
-        print 'Error during optimization (model inf or unbd).'
+        print('Error during optimization (model inf or unbd).')
 
     elif m.status == GRB.status.INFEASIBLE:
-        print 'Error during optimization (model infeasible).'
+        print('Error during optimization (model infeasible).')
 
     elif m.status == GRB.status.INTERRUPTED:
-        print 'Interrupted.'
+        print('Interrupted.')
 
     elif m.status == GRB.status.OPTIMAL or m.status == GRB.TIME_LIMIT:
         obj = m.getAttr("ObjVal")
-        print "Obj is: ", obj
+        print("Obj is: ", obj)
 
         gap = m.getAttr("MIPGap")
-        print "MIP gap is: ", gap
+        print("MIP gap is: ", gap)
 
         allocation = []
 
@@ -157,7 +157,11 @@ if __name__ == "__main__":
                     break
 
             if not fractional:
-                print "Allocation is: ", allocation
+                print("Allocation is: ", allocation)
                 assert(is_solution_connected(graph, allocation))
 
         write_log(gflags.FLAGS.log_file, runtime, obj, allocation, fractional, gap)
+
+
+if __name__ == "__main__":
+    run_main()

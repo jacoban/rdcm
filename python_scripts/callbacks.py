@@ -6,7 +6,7 @@ def lazy_connection(model):
     graph = model._graph
     working_graph_c = model._working_graph.copy()
 
-    allocation_vertices = filter(lambda x: model.cbGetSolution(Y[x]) > 0.5, vertices)
+    allocation_vertices = list(filter(lambda x: model.cbGetSolution(Y[x]) > 0.5, vertices))
 
     working_edges = []
     for i in allocation_vertices:
@@ -21,17 +21,17 @@ def lazy_connection(model):
 
     components = working_graph_c.components()
     allocation_vertices_set = set(allocation_vertices)
-    components = filter(lambda x: len(set(x).intersection(allocation_vertices_set)) > 0, components)
+    components = list(filter(lambda x: len(set(x).intersection(allocation_vertices_set)) > 0, components))
 
     if len(components) == 1:
         return True, allocation_vertices
 
-    for c_i in xrange(len(components)):
+    for c_i in range(len(components)):
         component_i = components[c_i]
         component_A_i_raw = graph.neighborhood(vertices=component_i, order=1)
 
         flattened_list_A_i = [y for x in component_A_i_raw for y in x]
-        component_A_i = set(filter(lambda x: x not in component_i, flattened_list_A_i))
+        component_A_i = set(list(filter(lambda x: x not in component_i, flattened_list_A_i)))
 
         component_and_neighs = component_A_i_raw
         component_and_neighs.append(component_i)
@@ -52,7 +52,7 @@ def lazy_connection(model):
         graph_without_component_i = graph.copy()
         graph_without_component_i.delete_edges(edges_to_remove)
 
-        for c_j in xrange(len(components)):
+        for c_j in range(len(components)):
             if c_i == c_j:
                 continue
 
